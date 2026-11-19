@@ -2,45 +2,62 @@
 import React from 'react';
 import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors, fonts, RSA_EXAMPLE as X} from '../shared/theme';
-import {Key, SceneFrame} from '../shared/components';
+import {Eye, Key, Keyhole, Padlock, SceneFrame} from '../shared/components';
 import {Chunk, cueOf, ease, Label, lerp, Place} from './A_helpers';
-import {warpChunks} from '../shared/timewarp';
+import {sentencesOf} from '../shared/timewarp';
+import {Arrow, Card, CARD_W, FS, Pill, Seg, Segment} from './S05_parts';
 
-const CHUNKS: Chunk[] = warpChunks('S05', [
-  [0.0, 1.6, "Let's build a tiny key pair."],
-  [2.12, 3.06, 'Pick two primes:'],
-  [3.34, 5.68, 'p equals five, and q equals eleven.'],
-  [6.16, 8.06, 'Multiply them to get n, fifty-five.'],
-  [8.66, 10.18, 'Next, compute phi of n:'],
-  [10.5, 11.46, 'p minus one,'],
-  [11.66, 13.9, 'times q minus one, which is forty.'],
-  [14.42, 17.78, 'Choose a public exponent e that shares no factors with forty.'],
-  [18.14, 18.78, "We'll use three."],
-  [19.28, 20.58, 'Finally, find d,'],
-  [20.74, 24.62, 'so that e times d leaves a remainder of one when divided by forty.'],
-  [25.26, 28.52, "That's twenty-seven, because eighty-one is two forties plus one."],
-  [28.98, 30.66, 'The public key is e and n.'],
-  [31.1, 32.28, 'The private key is d.'],
-  [32.7, 34.36, 'Everything else gets thrown away.'],
-]);
+/*
+ * Timing. SENTENCES are the exact sentence timings of the current narration (durations.json).
+ * PHRASES refine them with pause boundaries found by silence detection on public/audio/S05.wav
+ * (RMS < 2 % of peak for ≥ 0.12 s), so value highlights land on the spoken words.
+ */
+const SENTENCES: Chunk[] = sentencesOf('S05');
+const PHRASES: Chunk[] = [
+  [0.11, 1.78, "Let's build a tiny key pair."],
+  [2.36, 3.33, 'Pick two primes:'],
+  [3.72, 6.09, 'p equals five, and q equals eleven.'],
+  [6.71, 8.16, 'Multiply them to get n,'],
+  [8.34, 9.09, 'fifty-five.'],
+  [9.74, 11.27, 'Next, compute phi of n:'],
+  [11.77, 12.74, 'p minus one,'],
+  [12.92, 15.11, 'times q minus one, which is forty.'],
+  [15.79, 17.41, 'Choose a public exponent e'],
+  [17.82, 19.79, 'that shares no factors with forty.'],
+  [20.51, 21.55, "We'll use three."],
+  [22.23, 22.75, 'Finally,'],
+  [22.9, 23.52, 'find d,'],
+  [24.07, 28.18, 'so that e times d leaves a remainder of one when divided by forty.'],
+  [28.78, 29.74, "That's twenty-seven,"],
+  [30.08, 30.4, 'because'],
+  [30.61, 32.73, 'eighty-one is two forties plus one.'],
+  [33.38, 35.22, 'Notice why Bob could do this.'],
+  [35.8, 37.53, 'Finding d needed phi of n,'],
+  [38.02, 40.23, 'and phi came straight from p and q,'],
+  [40.55, 41.81, 'which only Bob knows.'],
+  [42.58, 45.29, 'Both keys grow out of the same secret primes,'],
+  [45.71, 48.37, 'so they fit together like a padlock and its key.'],
+  [48.96, 51.73, 'Bob publishes e and n as his public key,'],
+  [52.2, 54.02, 'and keeps d as his private key.'],
+  [54.71, 56.36, 'Everyone else sees only n.'],
+  [57.16, 57.88, 'To get d,'],
+  [58.25, 61.34, 'they would first have to factor n back into p and q,'],
+  [61.86, 64.4, 'and that is exactly the hard direction of the trapdoor.'],
+];
 
-const c = (phrase: string, at: 'start' | 'end' = 'start') => cueOf(CHUNKS, phrase, at);
-
-/* ---------- step list model ---------- */
-
-type Seg = {
-  text: string;
-  cue: number; // frame the segment appears / is spoken
-  val?: boolean; // a value: amber + highlight pulse when spoken
-  small?: boolean; // side note (muted, smaller)
-  ph?: string; // placeholder shown from the line's start until `cue`
-  swap?: {cue: number; text: string}; // replace text at a later cue
+const c = (phrase: string, at: 'start' | 'end' = 'start') => {
+  try {
+    return cueOf(PHRASES, phrase, at);
+  } catch {
+    return cueOf(SENTENCES, phrase, at);
+  }
 };
 
-const FS = 56; // step font size
-const SMALL = 42;
-const LEFT = 120;
+/* ---------- step list ---------- */
+
+const LEFT = 170;
 const ROWS = [250, 380, 510, 640, 770];
+const CH = FS * 0.6; // mono char width
 
 const buildSteps = (): Seg[][] => [
   [
@@ -82,76 +99,25 @@ const buildSteps = (): Seg[][] => [
   ],
 ];
 
-const Segment: React.FC<{seg: Seg; lineStart: number}> = ({seg, lineStart}) => {
-  const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const shown = frame >= seg.cue - 2;
-  const pulse = spring({frame: frame - seg.cue, fps, config: {damping: 10}});
-  const active = seg.val && shown ? Math.max(0, 1 - ease(frame, seg.cue + 18, seg.cue + 40)) : 0;
-  const text = seg.swap && frame >= seg.swap.cue ? seg.swap.text : seg.text;
+/* ---------- layout constants ---------- */
 
-  if (!shown) {
-    if (seg.ph && frame >= lineStart) {
-      return <span style={{color: colors.dim}}>{seg.ph}</span>;
-    }
-    return null;
-  }
-  const color = seg.small ? colors.muted : seg.val ? colors.math : '#e2e8f0';
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        whiteSpace: 'pre',
-        fontSize: seg.small ? SMALL : FS,
-        color,
-        fontWeight: seg.val ? 800 : 500,
-        opacity: Math.min(1, pulse * 1.5),
-        padding: seg.val ? '0 6px' : 0,
-        borderRadius: 12,
-        background: `rgba(251, 191, 36, ${0.28 * active})`,
-        boxShadow: active > 0 ? `0 0 ${30 * active}px rgba(251, 191, 36, ${0.6 * active})` : 'none',
-        transform: seg.val ? `scale(${1 + 0.22 * active * pulse})` : undefined,
-      }}
-    >
-      {text}
-    </span>
-  );
-};
+const PUB: [number, number] = [1590, 390];
+const PRIV: [number, number] = [1590, 730];
+const CARD_X0 = PUB[0] - CARD_W / 2 + 34; // first char of a card row
+const PUB_ROW1 = PUB[1] - 10; // y of "e = …" in the public card (measured on stills)
+const PUB_ROW2 = PUB[1] + 68; // y of "n = …"
+const PRIV_ROW1 = PRIV[1] + 30; // y of "d = …"
 
-/* ---------- key cards ---------- */
+// "same secret primes" tree
+const ROOT: [number, number] = [660, 300];
+const LCHILD: [number, number] = [370, 540];
+const RCHILD: [number, number] = [950, 540];
+const LOCK: [number, number] = [370, 800];
+const KEY0: [number, number] = [950, 842];
+const TCH = 52 * 0.6; // tree pill char width
 
-const Card: React.FC<{
-  color: string;
-  title: string;
-  rows: {label: string; value: string; filled: number}[];
-  s: number;
-}> = ({color, title, rows, s}) => (
-  <div
-    style={{
-      width: 500,
-      borderRadius: 28,
-      border: `4px solid ${color}`,
-      background: `${color}12`,
-      padding: '22px 30px',
-      opacity: s,
-      transform: `scale(${0.85 + 0.15 * s})`,
-      boxSizing: 'border-box',
-    }}
-  >
-    <div style={{display: 'flex', alignItems: 'center', gap: 20}}>
-      <Key color={color} size={110} />
-      <div style={{fontSize: 48, fontWeight: 800, color}}>{title}</div>
-    </div>
-    {rows.map((r) => (
-      <div key={r.label} style={{fontFamily: fonts.mono, fontSize: 52, marginTop: 10, color: '#e2e8f0'}}>
-        {r.label} ={' '}
-        <span style={{color: r.filled > 0 ? colors.math : colors.dim, fontWeight: 800, opacity: r.filled > 0 ? r.filled : 1}}>
-          {r.filled > 0 ? r.value : '?'}
-        </span>
-      </div>
-    ))}
-  </div>
-);
+// attacker path (row)
+const PY = 740;
 
 /* ---------- scene ---------- */
 
@@ -161,52 +127,42 @@ export const S05KeyGen: React.FC = () => {
   const pop = (d: number, damping = 14) => spring({frame: frame - d, fps, config: {damping}});
   const steps = buildSteps();
 
+  // cues
   const tPair = c('tiny key pair');
   const tPick = c('Pick two primes');
-  const tPubKey = c('The public key is');
-  const tE = c('is e and n');
-  const tN = c('and n');
-  const tPrivD = c('The private key is d');
-  const tD = c('is d');
-  const tAway = c('Everything else');
-  const tThrown = c('thrown away');
+  const tNotice = c('Notice why');
+  const tFindD = c('Finding d needed');
+  const tPhiFrom = c('and phi came');
+  const tOnlyBob = c('which only Bob');
+  const tBoth = c('Both keys grow');
+  const tSame = c('same secret primes');
+  const tFit = c('fit together');
+  const tPadlock = c('like a padlock');
+  const tPub = c('Bob publishes');
+  const tE = c('e and n as');
+  const tN = c('n as his');
+  const tKeeps = c('keeps d');
+  const tD = c('d as his private');
+  const tEveryone = c('Everyone else');
+  const tOnlyN = c('only n');
+  const tToGet = c('To get d');
+  const tFactor = c('factor n back');
+  const tIntoPQ = c('into p and q');
+  const tExactly = c('that is exactly');
+  const tHard = c('hard direction');
+  const tTrap = c('trapdoor');
 
-  const sHead = pop(0);
-  const sCards = pop(tPair);
-  // line start = its first segment cue (line 1 starts at "Pick two primes")
-  const lineStarts = steps.map((l, i) => (i === 0 ? tPick : l[0].cue));
-  const current = lineStarts.reduce((acc, t, i) => (frame >= t - 2 ? i : acc), -1);
+  /* phase switches */
+  const listOut = ease(frame, tBoth - 8, tBoth + 16); // step list slides away
+  const treeOut = ease(frame, tEveryone - 4, tEveryone + 16);
+  const spot = ease(frame, tEveryone - 4, tEveryone + 14); // everything but the public card dims
 
-  // flights from the step list into the cards
-  const charW = FS * 0.6;
-  const PUB: [number, number] = [1560, 400];
-  const PRIV: [number, number] = [1560, 730];
-  const flight = (t: number) => ease(frame, t, t + 22);
-  const flyE = flight(tE);
-  const flyN = flight(tN);
-  const flyD = flight(tD);
-  const srcE: [number, number] = [LEFT + 40 + charW * 4.5, ROWS[3]];
-  const srcN: [number, number] = [LEFT + 40 + charW * 13, ROWS[1]];
-  const srcD: [number, number] = [LEFT + 40 + charW * 5, ROWS[4]];
-  // destinations inside the cards (value column)
-  const dstE: [number, number] = [PUB[0] - 250 + 30 + charW * 0.93 * 4.5, PUB[1] + 30];
-  const dstN: [number, number] = [PUB[0] - 250 + 30 + charW * 0.93 * 5, PUB[1] + 100];
-  const dstD: [number, number] = [PRIV[0] - 250 + 30 + charW * 0.93 * 5, PRIV[1] + 30];
-
-  const sPubGlow = ease(frame, tPubKey - 4, tPubKey + 10) * (1 - ease(frame, tPrivD - 4, tPrivD + 8));
-  const sPrivGlow = ease(frame, tPrivD - 4, tPrivD + 10) * (1 - ease(frame, tAway, tAway + 10));
-  const thrown = ease(frame, tAway + 2, tAway + 30);
-  const sThrownLabel = pop(tThrown);
-
-  const flyer = (p: number, from: [number, number], to: [number, number], text: string) =>
-    p > 0 && p < 1 ? (
-      <Place x={lerp(p, from[0], to[0])} y={lerp(p, from[1], to[1]) - Math.sin(p * Math.PI) * 80} s={1 + 0.3 * Math.sin(p * Math.PI)}>
-        <div style={{fontFamily: fonts.mono, fontWeight: 800, fontSize: FS, color: colors.math}}>{text}</div>
-      </Place>
-    ) : null;
-
-  return (
-    <SceneFrame>
+  /* ---------- heading (cross-fades between the three parts) ---------- */
+  const h1 = pop(0) * (1 - ease(frame, tNotice - 12, tNotice - 2));
+  const h2 = ease(frame, tNotice, tNotice + 12) * (1 - ease(frame, tEveryone - 12, tEveryone - 2));
+  const h3 = ease(frame, tEveryone, tEveryone + 12);
+  const heading = (text: string, o: number, color: string = colors.text) =>
+    o > 0 ? (
       <div
         style={{
           position: 'absolute',
@@ -215,95 +171,389 @@ export const S05KeyGen: React.FC = () => {
           textAlign: 'center',
           fontSize: 64,
           fontWeight: 800,
-          opacity: sHead,
-          transform: `translateY(${(1 - sHead) * 30}px)`,
+          color,
+          opacity: o,
+          transform: `translateY(${(1 - o) * 20}px)`,
         }}
       >
-        Generating a tiny key pair
+        {text}
       </div>
+    ) : null;
 
-      {/* step list */}
-      {steps.map((line, i) => {
-        const start = lineStarts[i];
-        const sLine = pop(start, 18);
-        const discard = i === 0 || i === 2 ? thrown : 0;
-        if (frame < start - 2) return null;
-        return (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: LEFT,
-              top: ROWS[i],
-              transform: `translate(${(1 - sLine) * -40}px, -50%) translateY(${discard * 16}px) rotate(${discard * -1.5}deg)`,
-              opacity: Math.min(1, sLine) * (1 - discard * 0.85),
-              fontFamily: fonts.mono,
-              display: 'flex',
-              alignItems: 'center',
-              whiteSpace: 'pre',
-              filter: discard > 0 ? `blur(${discard * 3}px)` : undefined,
-            }}
-          >
-            <div
-              style={{
-                width: 12,
-                height: 64,
-                borderRadius: 6,
-                marginRight: 28,
-                background: current === i && frame < tPubKey ? colors.math : colors.dim,
-              }}
-            />
-            {line.map((seg, j) => (
-              <Segment key={j} seg={seg} lineStart={start} />
-            ))}
-            {discard > 0 && (
+  /* ---------- step list ---------- */
+  const lineStarts = steps.map((l, i) => (i === 0 ? tPick : l[0].cue));
+  const current = lineStarts.reduce((acc, t, i) => (frame >= t - 2 ? i : acc), -1);
+  const focus = ease(frame, tNotice, tNotice + 15); // "Notice why…": dependency path in focus
+  const arrPhiD = ease(frame, tFindD, tFindD + 22);
+  const arrPQPhi = ease(frame, tPhiFrom, tPhiFrom + 22);
+  const rowGlow = [arrPQPhi, 0, Math.max(arrPhiD, arrPQPhi), 0, arrPhiD];
+  const sTag = pop(tOnlyBob);
+
+  /* ---------- tree ---------- */
+  const sRoot = pop(tBoth);
+  const sSame = pop(tSame);
+  const brL = ease(frame, tBoth + 8, tBoth + 30);
+  const brR = ease(frame, tBoth + 14, tBoth + 36);
+  const sL = pop(tBoth + 26);
+  const sR = pop(tBoth + 32);
+  const stem = ease(frame, tFit - 12, tFit + 6);
+  const sLock = pop(tFit);
+  const sKey = pop(tFit + 6);
+  const slide = ease(frame, tPadlock, tPadlock + 28);
+  const click = ease(frame, tPadlock + 28, tPadlock + 36);
+  const flash = click * (1 - ease(frame, tPadlock + 40, tPadlock + 70));
+  const sMatch = pop(tPadlock + 30);
+  const keyPos: [number, number] = [lerp(slide, KEY0[0], LOCK[0] + 92), KEY0[1]];
+
+  /* ---------- flights into the cards ---------- */
+  const flight = (t: number) => ease(frame, t, t + 22);
+  const flyE = flight(tE);
+  const flyN = flight(tN);
+  const flyD = flight(tD);
+  const lPill = LCHILD[0] - (14 * TCH + 52) / 2; // left edge of "e = 3   n = 55"
+  const rPill = RCHILD[0] - (6 * TCH + 52) / 2;
+  const srcE: [number, number] = [lPill + 26 + 4.5 * TCH, LCHILD[1]];
+  const srcN: [number, number] = [lPill + 26 + 13 * TCH, LCHILD[1]];
+  const srcD: [number, number] = [rPill + 26 + 5 * TCH, RCHILD[1]];
+  const CW = 52 * 0.6;
+  const dstE: [number, number] = [CARD_X0 + 4.5 * CW, PUB_ROW1];
+  const dstN: [number, number] = [CARD_X0 + 5 * CW, PUB_ROW2];
+  const dstD: [number, number] = [CARD_X0 + 5 * CW, PRIV_ROW1];
+  const filled = (p: number, t: number) => (p >= 1 ? Math.max(0.001, ease(frame, t + 22, t + 34)) : 0);
+  const flyer = (p: number, from: [number, number], to: [number, number], text: string, color: string) =>
+    p > 0 && p < 1 ? (
+      <Place x={lerp(p, from[0], to[0])} y={lerp(p, from[1], to[1]) - Math.sin(p * Math.PI) * 90} s={1 + 0.3 * Math.sin(p * Math.PI)}>
+        <div style={{fontFamily: fonts.mono, fontWeight: 800, fontSize: 52, color, textShadow: `0 0 18px ${color}`}}>{text}</div>
+      </Place>
+    ) : null;
+
+  const pubGlow = Math.max(
+    ease(frame, tPub - 4, tPub + 10) * (1 - ease(frame, tKeeps - 4, tKeeps + 8)),
+    0.8 * spot,
+  );
+  const privGlow = ease(frame, tKeeps - 4, tKeeps + 10) * (1 - ease(frame, tEveryone - 4, tEveryone + 8));
+
+  /* ---------- everyone else ---------- */
+  const eyeOpen = ease(frame, tEveryone + 4, tEveryone + 16);
+  const sight = ease(frame, tOnlyN, tOnlyN + 14);
+  const sSees = pop(tOnlyN);
+  const EYE: [number, number] = [1090, PUB_ROW2];
+  const nGlow = sight * (0.6 + 0.4 * Math.sin((frame - tOnlyN) / 6));
+
+  /* ---------- attacker's reverse path ---------- */
+  const sPn = pop(tToGet);
+  const sPd = pop(tToGet + 8);
+  const aFactor = ease(frame, tFactor, tFactor + 20);
+  const sPq = pop(tIntoPQ);
+  const aPhi = ease(frame, tIntoPQ + 14, tIntoPQ + 30);
+  const sPhi = pop(tIntoPQ + 24);
+  const aD = ease(frame, tIntoPQ + 34, tIntoPQ + 50);
+  const sBob = pop(tIntoPQ + 40);
+  const sHole = pop(tExactly);
+  const hardPulse = spring({frame: frame - tHard, fps, config: {damping: 8}});
+  const trapGlow = ease(frame, tTrap, tTrap + 12);
+
+  return (
+    <SceneFrame>
+      {heading('Generating a tiny key pair', h1)}
+      {heading('Why Bob can make both keys', h2)}
+      {heading('What everyone else sees', h3)}
+
+      {/* ===== step list (slides away once the tree takes over) ===== */}
+      {listOut < 1 && (
+        <div style={{position: 'absolute', inset: 0, opacity: 1 - listOut, transform: `translateX(${-260 * listOut}px)`}}>
+          {steps.map((line, i) => {
+            const start = lineStarts[i];
+            const sLine = pop(start, 18);
+            if (frame < start - 2) return null;
+            const onPath = i % 2 === 0;
+            const g = rowGlow[i];
+            return (
               <div
+                key={i}
                 style={{
                   position: 'absolute',
-                  left: 30,
-                  right: -10,
-                  top: '50%',
-                  height: 6,
-                  background: colors.bad,
-                  transform: `scaleX(${discard})`,
-                  transformOrigin: 'left',
+                  left: LEFT,
+                  top: ROWS[i],
+                  transform: `translate(${(1 - sLine) * -40}px, -50%)`,
+                  opacity: Math.min(1, sLine) * (onPath ? 1 : 1 - 0.65 * focus),
+                  fontFamily: fonts.mono,
+                  display: 'flex',
+                  alignItems: 'center',
+                  whiteSpace: 'pre',
+                  padding: '4px 18px 4px 0',
+                  borderRadius: 18,
+                  background: `rgba(244, 114, 182, ${0.12 * g})`,
+                  boxShadow: g > 0 ? `0 0 ${34 * g}px rgba(244, 114, 182, ${0.55 * g})` : 'none',
                 }}
-              />
-            )}
-          </div>
-        );
-      })}
+              >
+                <div
+                  style={{
+                    width: 12,
+                    height: 64,
+                    borderRadius: 6,
+                    marginRight: 28,
+                    background: g > 0.5 ? colors.privateKey : current === i && frame < tNotice ? colors.math : colors.dim,
+                  }}
+                />
+                {line.map((seg, j) => (
+                  <Segment key={j} seg={seg} lineStart={start} />
+                ))}
+              </div>
+            );
+          })}
 
-      {/* key cards */}
-      <Place x={PUB[0]} y={PUB[1]} style={{filter: `drop-shadow(0 0 ${28 * sPubGlow}px ${colors.publicKey})`}}>
+          {/* dependency arrows in the left gutter: p, q → φ(n) → d */}
+          <Arrow
+            d={`M ${LEFT - 22} ${ROWS[0] + 24} C ${LEFT - 130} ${ROWS[0] + 70}, ${LEFT - 130} ${ROWS[2] - 70}, ${LEFT - 26} ${ROWS[2] - 20}`}
+            p={arrPQPhi}
+            color={colors.privateKey}
+            head={[LEFT - 24, ROWS[2] - 20, 25]}
+            glow
+          />
+          <Arrow
+            d={`M ${LEFT - 22} ${ROWS[2] + 24} C ${LEFT - 130} ${ROWS[2] + 70}, ${LEFT - 130} ${ROWS[4] - 70}, ${LEFT - 26} ${ROWS[4] - 20}`}
+            p={arrPhiD}
+            color={colors.privateKey}
+            head={[LEFT - 24, ROWS[4] - 20, 25]}
+            glow
+          />
+
+          {/* "only Bob knows" tag on p, q */}
+          <div
+            style={{
+              position: 'absolute',
+              left: LEFT + 40 + 15 * CH + 30,
+              top: ROWS[0],
+              transform: `translateY(-50%) scale(${0.7 + 0.3 * sTag})`,
+              transformOrigin: 'left center',
+              opacity: sTag,
+              padding: '8px 24px',
+              borderRadius: 999,
+              background: `${colors.privateKey}26`,
+              border: `3px solid ${colors.privateKey}`,
+              color: colors.privateKey,
+              fontSize: 42,
+              fontWeight: 800,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            only Bob knows
+          </div>
+        </div>
+      )}
+
+      {/* ===== "same secret primes" tree ===== */}
+      {frame >= tBoth - 2 && treeOut < 1 && (
+        <div style={{position: 'absolute', inset: 0, opacity: 1 - treeOut}}>
+          <svg width={1920} height={1080} style={{position: 'absolute', left: 0, top: 0}}>
+            <path
+              d={`M ${ROOT[0]} ${ROOT[1] + 46} C ${ROOT[0]} ${ROOT[1] + 130}, ${LCHILD[0]} ${LCHILD[1] - 130}, ${LCHILD[0]} ${LCHILD[1] - 46}`}
+              pathLength={1}
+              strokeDasharray={1}
+              strokeDashoffset={1 - brL}
+              stroke={colors.publicKey}
+              strokeWidth={8}
+              fill="none"
+              strokeLinecap="round"
+            />
+            <path
+              d={`M ${ROOT[0]} ${ROOT[1] + 46} C ${ROOT[0]} ${ROOT[1] + 130}, ${RCHILD[0]} ${RCHILD[1] - 130}, ${RCHILD[0]} ${RCHILD[1] - 46}`}
+              pathLength={1}
+              strokeDasharray={1}
+              strokeDashoffset={1 - brR}
+              stroke={colors.privateKey}
+              strokeWidth={8}
+              fill="none"
+              strokeLinecap="round"
+            />
+            <line x1={LCHILD[0]} y1={LCHILD[1] + 46} x2={LCHILD[0]} y2={lerp(stem, LCHILD[1] + 46, LOCK[1] - 100)} stroke={colors.publicKey} strokeWidth={6} strokeDasharray="14 12" opacity={stem} />
+            <line x1={RCHILD[0]} y1={RCHILD[1] + 46} x2={RCHILD[0]} y2={lerp(stem, RCHILD[1] + 46, KEY0[1] - 70)} stroke={colors.privateKey} strokeWidth={6} strokeDasharray="14 12" opacity={stem * (1 - slide)} />
+          </svg>
+
+          <Place x={ROOT[0]} y={ROOT[1] - 90} o={sSame} s={0.8 + 0.2 * sSame}>
+            <Label size={44} color={colors.privateKey}>
+              same secret primes
+            </Label>
+          </Place>
+          <Place x={ROOT[0]} y={ROOT[1]} o={sRoot} s={0.6 + 0.4 * sRoot}>
+            <Pill color={colors.privateKey} size={56} glow={0.6}>
+              <span style={{color: colors.math}}>p = 5,  q = 11</span>
+            </Pill>
+          </Place>
+          <Place x={LCHILD[0]} y={LCHILD[1]} o={sL} s={0.6 + 0.4 * sL}>
+            <Pill color={colors.publicKey}>
+              {'e = '}
+              <span style={{color: colors.math, opacity: flyE > 0 ? 0.35 : 1}}>{X.e}</span>
+              {'   n = '}
+              <span style={{color: colors.math, opacity: flyN > 0 ? 0.35 : 1}}>{X.n}</span>
+            </Pill>
+          </Place>
+          <Place x={RCHILD[0]} y={RCHILD[1]} o={sR} s={0.6 + 0.4 * sR}>
+            <Pill color={colors.privateKey}>
+              {'d = '}
+              <span style={{color: colors.math, opacity: flyD > 0 ? 0.35 : 1}}>{X.d}</span>
+            </Pill>
+          </Place>
+
+          {/* key (drawn under the padlock so it looks inserted) */}
+          <Place x={keyPos[0]} y={keyPos[1]} o={sKey} s={0.6 + 0.4 * sKey} rot={180}>
+            <Key color={colors.privateKey} size={200} />
+          </Place>
+          <Place
+            x={LOCK[0]}
+            y={LOCK[1]}
+            o={sLock}
+            s={(0.6 + 0.4 * sLock) * (1 + 0.12 * flash)}
+            style={{filter: `drop-shadow(0 0 ${40 * flash}px ${colors.ok})`}}
+          >
+            <Padlock color={colors.publicKey} size={130} closed={1} />
+          </Place>
+          <Place x={(LOCK[0] + KEY0[0]) / 2 + 40} y={LOCK[1] - 10} o={sMatch} s={0.8 + 0.2 * sMatch}>
+            <Label size={46} color={colors.ok}>
+              ✓ they fit
+            </Label>
+          </Place>
+        </div>
+      )}
+
+      {/* ===== key cards ===== */}
+      <Place x={PUB[0]} y={PUB[1]} style={{filter: `drop-shadow(0 0 ${30 * pubGlow}px ${colors.publicKey})`}}>
         <Card
           color={colors.publicKey}
           title="Public key"
-          s={sCards}
+          s={pop(tPair)}
           rows={[
-            {label: 'e', value: String(X.e), filled: flyE >= 1 ? 1 : 0},
-            {label: 'n', value: String(X.n), filled: flyN >= 1 ? 1 : 0},
+            {label: 'e', value: String(X.e), filled: filled(flyE, tE)},
+            {label: 'n', value: String(X.n), filled: filled(flyN, tN)},
           ]}
         />
       </Place>
-      <Place x={PRIV[0]} y={PRIV[1]} style={{filter: `drop-shadow(0 0 ${28 * sPrivGlow}px ${colors.privateKey})`}}>
+      <Place
+        x={PRIV[0]}
+        y={PRIV[1]}
+        o={1 - 0.75 * spot}
+        style={{filter: `drop-shadow(0 0 ${30 * privGlow}px ${colors.privateKey})`}}
+      >
         <Card
           color={colors.privateKey}
           title="Private key"
           s={pop(tPair + 8)}
-          rows={[{label: 'd', value: String(X.d), filled: flyD >= 1 ? 1 : 0}]}
+          rows={[{label: 'd', value: String(X.d), filled: filled(flyD, tD)}]}
         />
       </Place>
 
-      {flyer(flyE, srcE, dstE, String(X.e))}
-      {flyer(flyN, srcN, dstN, String(X.n))}
-      {flyer(flyD, srcD, dstD, String(X.d))}
+      {flyer(flyE, srcE, dstE, String(X.e), colors.publicKey)}
+      {flyer(flyN, srcN, dstN, String(X.n), colors.publicKey)}
+      {flyer(flyD, srcD, dstD, String(X.d), colors.privateKey)}
 
-      <Place x={620} y={920} o={sThrownLabel} s={0.9 + 0.1 * sThrownLabel}>
-        <Label size={48} color={colors.bad}>
-          p, q and φ(n): thrown away
-        </Label>
-      </Place>
+      {/* ===== everyone else sees only n ===== */}
+      {spot > 0 && (
+        <>
+          {/* ring around n = 55 in the public card */}
+          <div
+            style={{
+              position: 'absolute',
+              left: CARD_X0 - 16,
+              top: PUB_ROW2 - 44,
+              width: 7 * CW + 32,
+              height: 88,
+              borderRadius: 18,
+              border: `4px solid ${colors.bad}`,
+              opacity: sight,
+              boxShadow: `0 0 ${30 * nGlow}px ${colors.bad}`,
+            }}
+          />
+          <svg width={1920} height={1080} style={{position: 'absolute', left: 0, top: 0}}>
+            <line
+              x1={EYE[0] + 95}
+              y1={EYE[1]}
+              x2={lerp(sight, EYE[0] + 95, CARD_X0 - 26)}
+              y2={EYE[1]}
+              stroke={colors.bad}
+              strokeWidth={6}
+              strokeDasharray="16 12"
+              opacity={sight}
+            />
+          </svg>
+          <Place x={EYE[0]} y={EYE[1]} o={spot} s={0.7 + 0.3 * spot}>
+            <Eye size={170} open={eyeOpen} />
+          </Place>
+          <Place x={EYE[0]} y={EYE[1] - 105} o={sSees} s={0.8 + 0.2 * sSees}>
+            <Label size={44} color={colors.bad}>
+              sees only n
+            </Label>
+          </Place>
+        </>
+      )}
+
+      {/* ===== attacker's reverse path: n → p, q → φ → d ===== */}
+      {frame >= tToGet - 2 && (
+        <>
+          <Arrow d={`M 312 ${PY} L 520 ${PY}`} p={aFactor} color={colors.bad} head={[536, PY, 0]} width={10} glow />
+          <Arrow d={`M 710 ${PY} L 790 ${PY}`} p={aPhi} color={colors.dim} head={[806, PY, 0]} width={8} />
+          <Arrow d={`M 990 ${PY} L 1066 ${PY}`} p={aD} color={colors.dim} head={[1082, PY, 0]} width={8} />
+
+          <Place x={424} y={PY - 52} o={aFactor}>
+            <Label size={42} color={colors.bad}>
+              factor
+            </Label>
+          </Place>
+
+          <Place x={200} y={PY} o={sPn} s={0.6 + 0.4 * sPn}>
+            <Pill color={colors.publicKey} size={50}>
+              {'n = '}
+              <span style={{color: colors.math}}>{X.n}</span>
+            </Pill>
+          </Place>
+          <Place x={628} y={PY} o={sPq} s={0.6 + 0.4 * sPq}>
+            <Pill color={colors.privateKey} size={50} dashed>
+              <span style={{filter: 'blur(9px)', color: colors.math}}>p, q</span>
+            </Pill>
+          </Place>
+          <Place x={900} y={PY} o={sPhi} s={0.6 + 0.4 * sPhi}>
+            <Pill color={colors.privateKey} size={50} dashed>
+              <span style={{filter: 'blur(9px)', color: colors.math}}>φ(n)</span>
+            </Pill>
+          </Place>
+          <Place x={1180} y={PY} o={sPd} s={0.6 + 0.4 * sPd}>
+            <Pill color={colors.privateKey} size={50} dashed>
+              {'d = '}
+              <span style={{color: colors.privateKey}}>?</span>
+            </Pill>
+          </Place>
+
+          {/* Bob's side: the bits only Bob has */}
+          <svg width={1920} height={1080} style={{position: 'absolute', left: 0, top: 0, opacity: sBob}}>
+            <path
+              d={`M 552 ${PY + 62} V ${PY + 80} H 976 V ${PY + 62}`}
+              fill="none"
+              stroke={colors.privateKey}
+              strokeWidth={5}
+              strokeLinecap="round"
+            />
+          </svg>
+          <Place x={764} y={PY + 126} o={sBob} s={0.8 + 0.2 * sBob}>
+            <Label size={42} color={colors.privateKey}>
+              hidden on Bob's side
+            </Label>
+          </Place>
+
+          {/* the trapdoor: factoring is the hard direction */}
+          <Place
+            x={392}
+            y={PY + 150}
+            o={sHole}
+            s={(0.6 + 0.4 * sHole) * (1 + 0.1 * Math.sin(Math.min(1, hardPulse) * Math.PI))}
+            style={{filter: `drop-shadow(0 0 ${30 * trapGlow}px ${colors.math})`}}
+          >
+            <div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+              <Keyhole size={110} color={colors.math} />
+              <div style={{fontSize: 56, fontWeight: 900, color: colors.bad}}>hard</div>
+            </div>
+          </Place>
+        </>
+      )}
     </SceneFrame>
   );
 };

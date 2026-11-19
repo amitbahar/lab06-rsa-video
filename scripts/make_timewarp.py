@@ -4,7 +4,9 @@ Scene files were timed against the v1 WAVs. This finds each sentence's start/end
 v1 audio (longest silences = sentence breaks), pairs them with the exact sentence times
 recorded in durations.json, and writes video/src/timewarp.json:
   {"S01": [[old_s, new_s], ...]}  (piecewise-linear anchors)
-Re-run after re-narrating; scenes whose sentence count changed fall back to linear scaling.
+Re-run after re-narrating. Scenes that no longer call warpChunks/makeT (i.e. use
+sentencesOf with the current audio) are skipped. Only warp scenes whose narration TEXT is
+unchanged since v1.
 Usage: make_timewarp.py   (needs git tag v1)
 """
 import io, json, pathlib, subprocess
@@ -74,8 +76,13 @@ def old_sentence_spans(wav, new_sents, ref_len):
 from kokoro_onnx import Kokoro
 k = Kokoro(str(root / "models/kokoro-v1.0.int8.onnx"), str(root / "models/voices-v1.0.bin"))
 V1_VOICE = "af_heart"
+scene_src = {f.name[:3]: f.read_text() for f in (root / "video/src/scenes").glob("S??_*.tsx")}
 warp = {}
 for sid, d in dur.items():
+    src = scene_src.get(sid, "")
+    if f"warpChunks('{sid}'" not in src and f"makeT('{sid}')" not in src:
+        print(sid, "uses current-audio timings (sentencesOf) - no warp")
+        continue
     wav = subprocess.run(["git", "show", f"v1:video/public/audio/{sid}.wav"], cwd=root, capture_output=True, check=True).stdout
     sents = d["sentences"]
     ref = [len(k.create(t, voice=V1_VOICE, speed=1.0, lang="en-us")[0]) / 24000 for _, _, t in sents]

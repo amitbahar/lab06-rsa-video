@@ -1,6 +1,6 @@
 # RSA Explained — Video Script
 
-**Format:** 1920×1080, 30 fps, Remotion (`video/`) · **Narration:** Kokoro, voice `af_heart`, speed 1.0 (`scripts/narrate.py`)
+**Format:** 1920×1080, 30 fps, Remotion (`video/`) · **Narration:** Kokoro, voice `am_michael`, speed 1.0 (`scripts/narrate.py`)
 **Target length:** ~3 minutes (10 scenes) · **Style:** dark slate background (`#0b1120` → `#1e293b`), white text, public key = sky `#38bdf8`, private key = pink `#f472b6`, accent/math = amber `#fbbf24`
 
 **Conventions**
@@ -38,16 +38,22 @@
 
 ---
 
-## S03 — Two keys: the padlock idea (~20 s)
+## S03 — Two keys: the padlock idea (~38 s)
 
 **Narration**
-> In nineteen seventy-seven, Rivest, Shamir and Adleman published a different idea: use two keys. A public key, which you hand out to everyone, and a private key, which you never share. Think of the public key as an open padlock. Anyone can snap it shut, but only the private key can open it.
+> In nineteen seventy-seven, Rivest, Shamir and Adleman published a different idea: use two keys. A public key, which you hand out to everyone, and a private key, which you never share. Think of the public key as an open padlock. Anyone can snap it shut, but only the private key can open it. Here is why that solves the problem. Bob can hand out as many open padlocks as he likes, even to the eavesdropper. Anyone who has one can lock a message for Bob. But locking a box does not let you unlock it, not even for the person who just locked it. So encrypting is open to everyone, while decrypting belongs to Bob alone. And because the private key never leaves Bob, there is nothing on the network worth stealing.
 
 **Visuals**
 - Names "Rivest · Shamir · Adleman · 1977" appear, then collapse into "RSA".
 - Bob generates a key pair: blue public key + pink private key (the two `Key` components from `TestClip`).
 - Blue key morphs into an open padlock; Bob copies it to everyone (padlock duplicates fan out, including to the eavesdropper — that's fine).
 - Alice puts a message in a box, snaps the padlock shut, sends it. Eavesdropper can't open it. Bob opens it with the pink key.
+- **Why it works (new beat):**
+  - "as many as he likes": a whole row of open blue padlocks multiplies out to a crowd (Alice, a few anonymous faces, *and* the eye).
+  - "Anyone… can lock a message": several senders each snap a padlock onto their own box; all boxes head toward Bob.
+  - "not even for the person who just locked it": Alice tries to reopen her own locked box → red ✗, the lock stays shut.
+  - "encrypting is open to everyone, while decrypting belongs to Bob alone": two-column summary card — sky column **🔒 Lock (encrypt): anyone with the public key**, pink column **🔓 Unlock (decrypt): only Bob, with the private key**.
+  - "never leaves Bob": the pink key sits in a "safe" next to Bob; the wire shows only blue padlocks and locked boxes; the eye scans them and finds nothing useful ("nothing to steal").
 
 ---
 
@@ -64,10 +70,10 @@
 
 ---
 
-## S05 — Generating the keys (~28 s)
+## S05 — Generating the keys (~50 s)
 
 **Narration**
-> Let's build a tiny key pair. Pick two primes: p equals five, and q equals eleven. Multiply them to get n, fifty-five. Next, compute phi of n: p minus one, times q minus one, which is forty. Choose a public exponent e that shares no factors with forty. We'll use three. Finally, find d, so that e times d leaves a remainder of one when divided by forty. That's twenty-seven, because eighty-one is two forties plus one. The public key is e and n. The private key is d. Everything else gets thrown away.
+> Let's build a tiny key pair. Pick two primes: p equals five, and q equals eleven. Multiply them to get n, fifty-five. Next, compute phi of n: p minus one, times q minus one, which is forty. Choose a public exponent e that shares no factors with forty. We'll use three. Finally, find d, so that e times d leaves a remainder of one when divided by forty. That's twenty-seven, because eighty-one is two forties plus one. Notice why Bob could do this. Finding d needed phi of n, and phi came straight from p and q, which only Bob knows. Both keys grow out of the same secret primes, so they fit together like a padlock and its key. Bob publishes e and n as his public key, and keeps d as his private key. Everyone else sees only n. To get d, they would first have to factor n back into p and q, and that is exactly the hard direction of the trapdoor.
 
 **Visuals**
 - Step list builds line by line in amber, each value highlighting as it is spoken:
@@ -76,7 +82,12 @@
   3. `φ(n) = (p−1)(q−1) = 4 · 10 = 40`
   4. `e = 3` (gcd(3, 40) = 1)
   5. `d = 27` (3 · 27 = 81 = 2·40 + 1)
-- At the end, values fly into two cards: blue **Public key (e = 3, n = 55)**, pink **Private key (d = 27)**. p, q, φ shred / fade out ("thrown away").
+- **Why Bob can make both keys (new beat):**
+  - "Notice why…": dependency arrows light up on the step list: `p, q` → `φ(n) = 40` → `d = 27` (pink glow along the path). A small "only Bob knows" tag on p, q.
+  - "Both keys grow out of the same secret primes": a little tree: p, q at the root, branching to `n, e` (sky) and `d` (pink); the two branches end in a padlock and its matching key that click together.
+  - "Bob publishes e and n… keeps d": values fly into the two cards — blue **Public key (e = 3, n = 55)**, pink **Private key (d = 27)**.
+  - "Everyone else sees only n": everything except the public card dims; the eye looks at `n = 55`.
+  - "factor n back into p and q": the attacker's arrow goes the other way `n → p, q → φ → d`, its first link (factoring) is red with the S04 `Keyhole`/"hard" label; p, q and φ stay hidden behind Bob (struck-through / blurred).
 
 ---
 
@@ -147,7 +158,7 @@
 |---|---|---|---|
 | S01 Hook | 12 s | S06 Encrypt/Decrypt | 24 s |
 | S02 Key-exchange problem | 18 s | S07 Why it works | 18 s |
-| S03 Two keys | 20 s | S08 Signatures | 18 s |
+| S03 Two keys | 49 s | S08 Signatures | 18 s |
 | S04 Trapdoor | 20 s | S09 Real world | 18 s |
-| S05 Key generation | 28 s | S10 Recap | 14 s |
-| | | **Total** | **~190 s (~3:10)** |
+| S05 Key generation | 65 s | S10 Recap | 14 s |
+| | | **Total** | **~267 s (~4:27, male voice am_michael)** |

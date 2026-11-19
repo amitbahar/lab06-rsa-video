@@ -6,8 +6,8 @@
 - `SCRIPT.md`: scene-by-scene narration and visuals (S01–S10)
 - `scripts/narrate_all.py`: turns SCRIPT.md narration into `video/public/audio/SNN.wav` and `video/src/durations.json` (Kokoro TTS)
 - `video/src/scenes/SNN_*.tsx`: one file per scene; `video/src/shared/`: theme and shared components
-- `scripts/make_timewarp.py`: scene cues were timed to the v1 voice; this maps them onto the current narration sentence by sentence (`video/src/timewarp.json`). Re-run after re-narrating.
-- `releases/`: finished renders. `rsa_v1.mp4` = first complete version (female voice `af_heart`), `rsa_v2.mp4` = male voice `am_michael`
+- `scripts/make_timewarp.py`: S01–S02, S04, S06–S10 were timed to the v1 voice; this maps their cues onto the current narration sentence by sentence (`video/src/timewarp.json`). S03 and S05 (rewritten in v3) read exact times from the current audio via `sentencesOf()`, which is the way to go for any re-narrated scene. Re-run after re-narrating.
+- `releases/`: finished renders. `rsa_v1.mp4` = first complete version (female voice `af_heart`), `rsa_v2.mp4` = male voice `am_michael`, `rsa_v3.mp4` = extended public/private-key explanation (S03, S05)
 
 ## Setup
 ```bash

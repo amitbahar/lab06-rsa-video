@@ -52,8 +52,8 @@
     ]
   },
   "S03": {
-    "seconds": 19.78,
-    "frames": 618,
+    "seconds": 49.23,
+    "frames": 1501,
     "sentences": [
       [
         0.0,
@@ -74,6 +74,36 @@
         15.515,
         19.781,
         "Anyone can snap it shut, but only the private key can open it."
+      ],
+      [
+        20.181,
+        22.677,
+        "Here is why that solves the problem."
+      ],
+      [
+        23.077,
+        28.368,
+        "Bob can hand out as many open padlocks as he likes, even to the eavesdropper."
+      ],
+      [
+        28.768,
+        32.096,
+        "Anyone who has one can lock a message for Bob."
+      ],
+      [
+        32.496,
+        38.192,
+        "But locking a box does not let you unlock it, not even for the person who just locked it."
+      ],
+      [
+        38.592,
+        43.584,
+        "So encrypting is open to everyone, while decrypting belongs to Bob alone."
+      ],
+      [
+        43.984,
+        49.232,
+        "And because the private key never leaves Bob, there is nothing on the network worth stealing."
       ]
     ]
   },
@@ -104,8 +134,8 @@
     ]
   },
   "S05": {
-    "seconds": 39.52,
-    "frames": 1210,
+    "seconds": 64.83,
+    "frames": 1969,
     "sentences": [
       [
         0.0,
@@ -149,18 +179,33 @@
       ],
       [
         33.344,
-        35.136,
-        "The public key is e and n."
+        35.328,
+        "Notice why Bob could do this."
       ],
       [
-        35.536,
-        36.987,
-        "The private key is d."
+        35.728,
+        42.128,
+        "Finding d needed phi of n, and phi came straight from p and q, which only Bob knows."
       ],
       [
-        37.387,
-        39.52,
-        "Everything else gets thrown away."
+        42.528,
+        48.523,
+        "Both keys grow out of the same secret primes, so they fit together like a padlock and its key."
+      ],
+      [
+        48.923,
+        54.192,
+        "Bob publishes e and n as his public key, and keeps d as his private key."
+      ],
+      [
+        54.592,
+        56.725,
+        "Everyone else sees only n."
+      ],
+      [
+        57.125,
+        64.827,
+        "To get d, they would first have to factor n back into p and q, and that is exactly the hard direction of the trapdoor."
       ]
     ]
   },

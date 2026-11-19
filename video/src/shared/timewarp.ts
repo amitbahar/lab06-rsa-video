@@ -19,3 +19,12 @@ export const warp = (id: string, s: number): number => {
 /** Warp [start, end, text] chunks (A_helpers format). */
 export const warpChunks = <T extends [number, number, string]>(id: string, chunks: T[]): T[] =>
   chunks.map(([a, b, t]) => [warp(id, a), warp(id, b), t] as T);
+
+/**
+ * Exact sentence timings of the CURRENT narration: [startSec, endSec, text][] (from durations.json).
+ * Preferred for new/re-narrated scenes: pass to A_helpers' cueOf, e.g. cueOf(sentencesOf('S03'), 'padlock').
+ * Scenes using this must NOT also use warpChunks/makeT (make_timewarp.py then skips them).
+ */
+import durations from '../durations.json';
+export const sentencesOf = (id: string): [number, number, string][] =>
+  (durations as unknown as Record<string, {sentences: [number, number, string][]}>)[id].sentences;
