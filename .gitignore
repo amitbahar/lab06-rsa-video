@@ -1,0 +1,9 @@
+# dependencies / large downloads (see README for how to restore)
+.venv/
+video/node_modules/
+models/
+# scratch renders (released videos live in releases/)
+out/
+video/src/durations.lock
+.claude/settings.local.json
+__pycache__/

@@ -1,0 +1,42 @@
+{
+  "S01": {
+    "seconds": 11.65,
+    "frames": 374
+  },
+  "S02": {
+    "seconds": 16.55,
+    "frames": 521
+  },
+  "S03": {
+    "seconds": 17.83,
+    "frames": 560
+  },
+  "S04": {
+    "seconds": 17.6,
+    "frames": 553
+  },
+  "S05": {
+    "seconds": 34.36,
+    "frames": 1055
+  },
+  "S06": {
+    "seconds": 21.29,
+    "frames": 663
+  },
+  "S07": {
+    "seconds": 17.77,
+    "frames": 558
+  },
+  "S08": {
+    "seconds": 15.27,
+    "frames": 483
+  },
+  "S09": {
+    "seconds": 17.62,
+    "frames": 553
+  },
+  "S10": {
+    "seconds": 11.22,
+    "frames": 361
+  }
+}
