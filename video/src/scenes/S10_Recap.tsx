@@ -3,7 +3,9 @@ import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors, fonts} from '../shared/theme';
 import {Heading, Key, SceneFrame, TitleCard} from '../shared/components';
-import {ease, Globe, T, useSpring} from './B_helpers';
+import {ease, Globe, makeT, useSpring} from './B_helpers';
+
+const T = makeT('S10');
 
 const F = {
   b1: T(1.4), // "Two keys: one public, one private."

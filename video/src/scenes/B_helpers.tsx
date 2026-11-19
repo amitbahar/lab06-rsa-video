@@ -1,10 +1,11 @@
 // Helpers for scenes S06–S10 (owned by the S06–S10 scene agent).
+import {warp} from '../shared/timewarp';
 import React from 'react';
 import {Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors, fonts} from '../shared/theme';
 
 /** Narration-WAV seconds → scene frame (narration starts 6 frames into the scene). */
-export const T = (s: number) => Math.round(6 + s * 30);
+export const makeT = (id: string) => (s: number) => Math.round(6 + warp(id, s) * 30);
 
 /** Eased 0→1 between frames a and b (clamped). */
 export const ease = (frame: number, a: number, b: number) =>

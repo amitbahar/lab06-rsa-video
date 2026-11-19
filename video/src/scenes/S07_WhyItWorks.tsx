@@ -3,7 +3,9 @@ import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {colors, fonts, RSA_EXAMPLE as X} from '../shared/theme';
 import {Heading, Keyhole, SceneFrame} from '../shared/components';
-import {ease, MiniLock, Place, PopAt, Sup, T, Txt, useSpring} from './B_helpers';
+import {ease, MiniLock, Place, PopAt, Sup, makeT, Txt, useSpring} from './B_helpers';
+
+const T = makeT('S07');
 
 const F = {
   inverse: T(2.9), // "chosen as inverses"

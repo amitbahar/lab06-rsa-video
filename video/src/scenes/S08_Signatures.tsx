@@ -3,7 +3,9 @@ import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {colors, fonts} from '../shared/theme';
 import {Avatar, Heading, Key, SceneFrame} from '../shared/components';
-import {Doc, ease, Face, MiniLock, Place, PopAt, T, Txt, useSpring} from './B_helpers';
+import {Doc, ease, Face, MiniLock, Place, PopAt, makeT, Txt, useSpring} from './B_helpers';
+
+const T = makeT('S08');
 
 const F = {
   sub: T(0.4), // "RSA also works in reverse"

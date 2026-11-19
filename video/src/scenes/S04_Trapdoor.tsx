@@ -4,8 +4,9 @@ import {interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors, fonts} from '../shared/theme';
 import {Keyhole, Padlock, SceneFrame} from '../shared/components';
 import {Chunk, cueOf, ease, Label, Place} from './A_helpers';
+import {warpChunks} from '../shared/timewarp';
 
-const CHUNKS: Chunk[] = [
+const CHUNKS: Chunk[] = warpChunks('S04', [
   [0.0, 1.08, 'To build such a lock,'],
   [1.42, 3.98, 'RSA uses a mathematical trapdoor.'],
   [4.52, 7.4, 'Multiplying two large prime numbers is easy.'],
@@ -13,7 +14,7 @@ const CHUNKS: Chunk[] = [
   [12.48, 13.76, 'Easy in one direction,'],
   [14.08, 15.86, 'practically impossible in the other,'],
   [16.2, 17.6, 'unless you know the secret.'],
-];
+]);
 
 // primes tried by trial division on 3233 = 53 × 61
 const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53];

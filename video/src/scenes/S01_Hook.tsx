@@ -4,14 +4,15 @@ import {interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors} from '../shared/theme';
 import {Eye, Packet, SceneFrame, TitleCard, Wire} from '../shared/components';
 import {Chunk, cueOf, ease, Label, Laptop, Place, Server} from './A_helpers';
+import {warpChunks} from '../shared/timewarp';
 
-const CHUNKS: Chunk[] = [
+const CHUNKS: Chunk[] = warpChunks('S01', [
   [0.0, 1.9, 'Every time you buy something online,'],
   [2.18, 5.28, 'your browser shares a secret with a computer it has never met,'],
   [5.74, 7.76, 'over a network anyone can listen to.'],
   [8.28, 9.62, 'How is that even possible?'],
   [10.06, 11.65, 'The answer is RSA.'],
-];
+]);
 
 const X1 = 470;
 const X2 = 1450;

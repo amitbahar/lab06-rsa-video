@@ -3,7 +3,9 @@ import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {colors, fonts, RSA_EXAMPLE as X} from '../shared/theme';
 import {Avatar, Eye, Heading, Key, Mark, Packet, SceneFrame, Wire} from '../shared/components';
-import {ease, Place, PopAt, Sup, T, Txt, useSpring} from './B_helpers';
+import {ease, Place, PopAt, Sup, makeT, Txt, useSpring} from './B_helpers';
+
+const T = makeT('S06');
 
 // Cues (narration-WAV seconds from silence detection → frames)
 const F = {

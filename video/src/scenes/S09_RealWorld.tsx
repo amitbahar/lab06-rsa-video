@@ -4,7 +4,9 @@ import {interpolate, useCurrentFrame} from 'remotion';
 import {colors, fonts, RSA_EXAMPLE as X} from '../shared/theme';
 import {Avatar, Heading, Key, SceneFrame} from '../shared/components';
 import {N2048} from './B_n2048';
-import {ease, MiniLock, Place, PopAt, T, Txt, useSpring} from './B_helpers';
+import {ease, MiniLock, Place, PopAt, makeT, Txt, useSpring} from './B_helpers';
+
+const T = makeT('S09');
 
 const F = {
   toy: T(1.8), // "five and eleven"

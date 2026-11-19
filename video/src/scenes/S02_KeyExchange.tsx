@@ -4,8 +4,9 @@ import {interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors} from '../shared/theme';
 import {Avatar, Eye, Key, Mark, Padlock, SceneFrame, Wire} from '../shared/components';
 import {Chunk, cueOf, ease, Label, lerp, MsgBox, Place} from './A_helpers';
+import {warpChunks} from '../shared/timewarp';
 
-const CHUNKS: Chunk[] = [
+const CHUNKS: Chunk[] = warpChunks('S02', [
   [0.0, 2.42, 'Classic encryption uses one shared key.'],
   [3.0, 5.52, 'The same key locks and unlocks the message.'],
   [6.0, 8.28, 'That works great, if you already share the key.'],
@@ -13,7 +14,7 @@ const CHUNKS: Chunk[] = [
   [10.64, 12.36, 'when anyone can read what you send?'],
   [12.82, 13.58, 'For centuries,'],
   [13.84, 16.55, 'this was the unsolved problem of cryptography.'],
-];
+]);
 
 const AX = 300;
 const BX = 1620;

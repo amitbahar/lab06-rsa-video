@@ -4,8 +4,9 @@ import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors, fonts, RSA_EXAMPLE as X} from '../shared/theme';
 import {Key, SceneFrame} from '../shared/components';
 import {Chunk, cueOf, ease, Label, lerp, Place} from './A_helpers';
+import {warpChunks} from '../shared/timewarp';
 
-const CHUNKS: Chunk[] = [
+const CHUNKS: Chunk[] = warpChunks('S05', [
   [0.0, 1.6, "Let's build a tiny key pair."],
   [2.12, 3.06, 'Pick two primes:'],
   [3.34, 5.68, 'p equals five, and q equals eleven.'],
@@ -21,7 +22,7 @@ const CHUNKS: Chunk[] = [
   [28.98, 30.66, 'The public key is e and n.'],
   [31.1, 32.28, 'The private key is d.'],
   [32.7, 34.36, 'Everything else gets thrown away.'],
-];
+]);
 
 const c = (phrase: string, at: 'start' | 'end' = 'start') => cueOf(CHUNKS, phrase, at);
 

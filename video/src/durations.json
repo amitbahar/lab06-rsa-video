@@ -1,42 +1,302 @@
 {
   "S01": {
-    "seconds": 11.65,
-    "frames": 374
+    "seconds": 13.77,
+    "frames": 438,
+    "sentences": [
+      [
+        0.0,
+        9.301,
+        "Every time you buy something online, your browser shares a secret with a computer it has never met, over a network anyone can listen to."
+      ],
+      [
+        9.701,
+        11.579,
+        "How is that even possible?"
+      ],
+      [
+        11.979,
+        13.771,
+        "The answer is RSA."
+      ]
+    ]
   },
   "S02": {
-    "seconds": 16.55,
-    "frames": 521
+    "seconds": 18.24,
+    "frames": 572,
+    "sentences": [
+      [
+        0.0,
+        2.709,
+        "Classic encryption uses one shared key."
+      ],
+      [
+        3.109,
+        5.925,
+        "The same key locks and unlocks the message."
+      ],
+      [
+        6.325,
+        9.013,
+        "That works great, if you already share the key."
+      ],
+      [
+        9.413,
+        13.552,
+        "But how do you send the key itself, when anyone can read what you send?"
+      ],
+      [
+        13.952,
+        18.24,
+        "For centuries, this was the unsolved problem of cryptography."
+      ]
+    ]
   },
   "S03": {
-    "seconds": 17.83,
-    "frames": 560
+    "seconds": 19.78,
+    "frames": 618,
+    "sentences": [
+      [
+        0.0,
+        6.613,
+        "In nineteen seventy-seven, Rivest, Shamir and Adleman published a different idea: use two keys."
+      ],
+      [
+        7.013,
+        11.877,
+        "A public key, which you hand out to everyone, and a private key, which you never share."
+      ],
+      [
+        12.277,
+        15.115,
+        "Think of the public key as an open padlock."
+      ],
+      [
+        15.515,
+        19.781,
+        "Anyone can snap it shut, but only the private key can open it."
+      ]
+    ]
   },
   "S04": {
-    "seconds": 17.6,
-    "frames": 553
+    "seconds": 19.03,
+    "frames": 596,
+    "sentences": [
+      [
+        0.0,
+        4.395,
+        "To build such a lock, RSA uses a mathematical trapdoor."
+      ],
+      [
+        4.795,
+        7.739,
+        "Multiplying two large prime numbers is easy."
+      ],
+      [
+        8.139,
+        13.152,
+        "But taking the result and finding the original primes is incredibly hard."
+      ],
+      [
+        13.552,
+        19.035,
+        "Easy in one direction, practically impossible in the other, unless you know the secret."
+      ]
+    ]
   },
   "S05": {
-    "seconds": 34.36,
-    "frames": 1055
+    "seconds": 39.52,
+    "frames": 1210,
+    "sentences": [
+      [
+        0.0,
+        1.92,
+        "Let's build a tiny key pair."
+      ],
+      [
+        2.32,
+        6.267,
+        "Pick two primes: p equals five, and q equals eleven."
+      ],
+      [
+        6.667,
+        9.291,
+        "Multiply them to get n, fifty-five."
+      ],
+      [
+        9.691,
+        15.344,
+        "Next, compute phi of n: p minus one, times q minus one, which is forty."
+      ],
+      [
+        15.744,
+        19.989,
+        "Choose a public exponent e that shares no factors with forty."
+      ],
+      [
+        20.389,
+        21.776,
+        "We'll use three."
+      ],
+      [
+        22.176,
+        28.32,
+        "Finally, find d, so that e times d leaves a remainder of one when divided by forty."
+      ],
+      [
+        28.72,
+        32.944,
+        "That's twenty-seven, because eighty-one is two forties plus one."
+      ],
+      [
+        33.344,
+        35.136,
+        "The public key is e and n."
+      ],
+      [
+        35.536,
+        36.987,
+        "The private key is d."
+      ],
+      [
+        37.387,
+        39.52,
+        "Everything else gets thrown away."
+      ]
+    ]
   },
   "S06": {
-    "seconds": 21.29,
-    "frames": 663
+    "seconds": 24.76,
+    "frames": 767,
+    "sentences": [
+      [
+        0.0,
+        2.709,
+        "Now Alice wants to send the number seven."
+      ],
+      [
+        3.109,
+        8.869,
+        "She uses Bob's public key: seven to the power of three is three hundred forty-three."
+      ],
+      [
+        9.269,
+        12.256,
+        "Modulo fifty-five, that leaves thirteen."
+      ],
+      [
+        12.656,
+        14.107,
+        "She sends thirteen."
+      ],
+      [
+        14.507,
+        21.653,
+        "Bob raises thirteen to the power of twenty-seven, modulo fifty-five, and gets back exactly seven."
+      ],
+      [
+        22.053,
+        24.763,
+        "The eavesdropper only ever saw thirteen."
+      ]
+    ]
   },
   "S07": {
-    "seconds": 17.77,
-    "frames": 558
+    "seconds": 20.51,
+    "frames": 640,
+    "sentences": [
+      [
+        0.0,
+        1.493,
+        "Why does this work?"
+      ],
+      [
+        1.893,
+        13.2,
+        "Because e and d were chosen as inverses, raising to e and then to d is the same as raising to e times d, which brings every message back to itself."
+      ],
+      [
+        13.6,
+        18.784,
+        "To find d, an attacker needs phi of n, and to get phi, they need to factor n."
+      ],
+      [
+        19.184,
+        20.507,
+        "That's the trapdoor."
+      ]
+    ]
   },
   "S08": {
-    "seconds": 15.27,
-    "frames": 483
+    "seconds": 17.2,
+    "frames": 540,
+    "sentences": [
+      [
+        0.0,
+        2.432,
+        "RSA also works in reverse."
+      ],
+      [
+        2.832,
+        8.293,
+        "If Bob encrypts something with his private key, anyone can check it with his public key."
+      ],
+      [
+        8.693,
+        10.656,
+        "Only Bob could have produced it."
+      ],
+      [
+        11.056,
+        17.2,
+        "That's a digital signature, and it's how your browser knows a website is really who it claims to be."
+      ]
+    ]
   },
   "S09": {
-    "seconds": 17.62,
-    "frames": 553
+    "seconds": 18.59,
+    "frames": 582,
+    "sentences": [
+      [
+        0.0,
+        3.349,
+        "Real RSA keys don't use five and eleven."
+      ],
+      [
+        3.749,
+        9.701,
+        "They use primes hundreds of digits long, giving keys of two thousand forty-eight bits or more."
+      ],
+      [
+        10.101,
+        18.592,
+        "And in practice, RSA is used to exchange or sign a small secret, while faster algorithms encrypt the actual data."
+      ]
+    ]
   },
   "S10": {
-    "seconds": 11.22,
-    "frames": 361
+    "seconds": 12.78,
+    "frames": 408,
+    "sentences": [
+      [
+        0.0,
+        1.237,
+        "So, to recap."
+      ],
+      [
+        1.637,
+        4.005,
+        "Two keys: one public, one private."
+      ],
+      [
+        4.405,
+        8.309,
+        "Security rests on how hard it is to factor a huge number."
+      ],
+      [
+        8.709,
+        12.784,
+        "And that simple idea protects almost everything you do online."
+      ]
+    ]
   }
 }

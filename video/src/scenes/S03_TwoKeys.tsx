@@ -4,8 +4,9 @@ import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {colors} from '../shared/theme';
 import {Avatar, Eye, Key, Mark, Padlock, SceneFrame, Wire} from '../shared/components';
 import {Chunk, cueOf, ease, Label, lerp, MsgBox, Place} from './A_helpers';
+import {warpChunks} from '../shared/timewarp';
 
-const CHUNKS: Chunk[] = [
+const CHUNKS: Chunk[] = warpChunks('S03', [
   [0.0, 1.34, 'In nineteen seventy-seven,'],
   [1.58, 2.14, 'Rivest,'],
   [2.3, 4.68, 'Shamir and Adleman published a different idea:'],
@@ -14,7 +15,7 @@ const CHUNKS: Chunk[] = [
   [11.36, 13.7, 'Think of the public key as an open padlock.'],
   [14.3, 15.66, 'Anyone can snap it shut,'],
   [15.96, 17.83, 'but only the private key can open it.'],
-];
+]);
 
 const AX = 300;
 const BX = 1620;
